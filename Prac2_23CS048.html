@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #d8e1e3, #deecef);
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .weather-app {
+      background-color: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 320px;
+    }
+
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1f6391;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="weather-app">
+    <h2>Live Weather Checker</h2>
+    <input type="text" id="cityInput" placeholder="Enter city name" />
+    <br />
+    <button onclick="getWeather()">Check Weather</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const apiKey = "WNnkTWlrqGj6XJ4dkN0zYwJgMragCoV3"; // Tomorrow.io API key
+
+    async function getWeather() {
+      const city = document.getElementById("cityInput").value.trim();
+      const result = document.getElementById("result");
+
+      if (city === "") {
+        result.innerText = "Please enter a city name.";
+        return;
+      }
+
+      // Use Open-Meteo Geocoding API to get coordinates for the city
+      try {
+        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`);
+        const geoData = await geoRes.json();
+        if (!geoData.results || geoData.results.length === 0) {
+          result.innerText = "City not found. Please try again.";
+          return;
+        }
+        const { latitude, longitude, name, country } = geoData.results[0];
+
+        // Fetch weather from Tomorrow.io API
+        const url = `https://api.tomorrow.io/v4/weather/realtime?location=${latitude},${longitude}&apikey=${apiKey}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (response.ok && data.data && data.data.values) {
+          const temp = data.data.values.temperature;
+          const condition = data.data.values.weatherCode ? getWeatherDescription(data.data.values.weatherCode) : "N/A";
+          result.innerHTML = `
+            <strong>${name}, ${country}</strong><br/>
+            Temperature: ${temp}°C<br/>
+            Condition: ${condition}
+          `;
+        } else {
+          result.innerText = "Weather data not available for this city.";
+        }
+      } catch (error) {
+        result.innerText = "Error fetching weather data.";
+        console.error(error);
+      }
+    }
+
+    // Helper to convert Tomorrow.io weather codes to text
+    function getWeatherDescription(code) {
+      const codes = {
+        0: "Unknown",
+        1000: "Clear, Sunny",
+        1100: "Mostly Clear",
+        1101: "Partly Cloudy",
+        1102: "Mostly Cloudy",
+        1001: "Cloudy",
+        2000: "Fog",
+        2100: "Light Fog",
+        4000: "Drizzle",
+        4001: "Rain",
+        4200: "Light Rain",
+        4201: "Heavy Rain",
+        5000: "Snow",
+        5001: "Flurries",
+        5100: "Light Snow",
+        5101: "Heavy Snow",
+        6000: "Freezing Drizzle",
+        6001: "Freezing Rain",
+        6200: "Light Freezing Rain",
+        6201: "Heavy Freezing Rain",
+        7000: "Ice Pellets",
+        7101: "Heavy Ice Pellets",
+        7102: "Light Ice Pellets",
+        8000: "Thunderstorm"
+      };
+      return codes[code] || "Unknown";
+    }
+  </script>
+</body>
+</html>
