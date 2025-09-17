@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Voting System</title>
+  
+    <script>
+        
+        const votes = {
+            'JavaScript': 0,
+            'Python': 0,
+            'Java': 0,
+            'C++': 0
+        };
+
+
+        function vote(language) {
+            votes[language]++;
+            updateVotes();
+        }
+
+        function updateVotes() {
+            for (const language in votes) {
+                document.getElementById(language).textContent = votes[language];
+            }
+        }
+
+
+        setInterval(() => {
+            const languages = Object.keys(votes);
+            const randomLang = languages[Math.floor(Math.random() * languages.length)];
+            votes[randomLang]++;
+            updateVotes();
+        }, 2000);
+
+    </script>
+</head>
+
+<body>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .poll-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            width: 400px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .buttons button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .results p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+    </style>
+    <div class="poll-container">
+        <h2>Vote for Your Favorite Programming Language</h2>
+
+        <div class="buttons">
+            <button onclick="vote('JavaScript')">JavaScript</button>
+            <button onclick="vote('Python')">Python</button>
+            <button onclick="vote('Java')">Java</button>
+            <button onclick="vote('C++')">C++</button>
+        </div>
+
+        <div class="results">
+            <p>JavaScript: <span id="JavaScript">0</span> votes</p>
+            <p>Python: <span id="Python">0</span> votes</p>
+            <p>Java: <span id="Java">0</span> votes</p>
+            <p>C++: <span id="C++">0</span> votes</p>
+        </div>
+    </div>
+
+
+</body>
+
+</html>
